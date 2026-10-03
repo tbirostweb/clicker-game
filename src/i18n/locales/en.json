@@ -1,0 +1,156 @@
+{
+  "app": {
+    "title": "Clicker Game"
+  },
+  "topbar": {
+    "settings": "Settings",
+    "trophies": "Trophies",
+    "leaderboard": "Leaderboard"
+  },
+  "start": {
+    "title": "Game Rules",
+    "cta": "Start",
+    "rules": [
+      { "title": "Gameplay", "desc": "Click to earn money and upgrade your gear. Each upgrade increases your earnings per second (CPS)." },
+      { "title": "Goals & Trophies", "desc": "Reach goals to unlock unique trophies and track your progress." },
+      { "title": "Rebirth", "desc": "Reset your upgrades but get a permanent bonus per click to progress faster and climb the leaderboard." },
+      { "title": "Timer & Leaderboard", "desc": "The leaderboard rewards active playtime: the longer you stay playing, the higher you climb." },
+      { "title": "Mobile", "desc": "Access your upgrades directly from your phone and keep progressing anywhere." }
+    ]
+  },
+  "game": {
+    "timer": "Time",
+    "perSecond": "/ sec",
+    "rebirthCount": "Rebirth",
+    "upgradesTitle": "Upgrades",
+    "rebirthLabel": "Rebirth",
+    "rebirthPerClick": "+3 / click",
+    "level": "Lvl {level}",
+    "submitPrompt": "Save your run to the leaderboard?",
+    "updatePrompt": "Update your leaderboard run with your current progress?",
+    "namePlaceholder": "Your name",
+    "submit": "Submit",
+    "update": "Update",
+    "submitted": "Run submitted to the leaderboard!",
+    "updated": "Run updated!",
+    "autoUpdateHint": "Your run auto-updates every 5 minutes.",
+    "submitError": "Couldn't submit your score right now.",
+    "upgradeNames": [
+      "Broken Keyboard", "Gaming Mouse", "HD Screen", "Local Server", "PC Farm",
+      "Data Center", "Clicker Robot", "Optimized AI", "Crypto Rig", "Ad Satellite",
+      "Quantum Supercomputer", "Space Station", "Planetary Network", "Parallel Dimension", "Divine Click"
+    ]
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "reset": "Reset progress",
+    "resetConfirm": "All your progress (money, upgrades, trophies) will be lost. Confirm?",
+    "resetDone": "Progress reset."
+  },
+  "trophies": {
+    "title": "Trophies",
+    "unlockedOf": "{unlocked} / {total} unlocked",
+    "points": "{points} trophy points",
+    "filters": {
+      "all": "All"
+    },
+    "categories": {
+      "basics": "Progress",
+      "upgrades": "Upgrades",
+      "rebirth": "Rebirth",
+      "wealth": "Wealth",
+      "time": "Playtime",
+      "fun": "Challenges",
+      "secret": "Secrets"
+    },
+    "tiers": {
+      "bronze": "Bronze",
+      "silver": "Silver",
+      "gold": "Gold",
+      "legendary": "Legendary"
+    },
+    "reward": {
+      "click": "+{percent}% clicks for life",
+      "cps": "+{percent}% earnings/sec for life",
+      "both": "+{percent}% clicks & earnings/sec for life"
+    }
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "subtitle": "Top runs, by category. Money and trophies count your cumulative progress across all rebirths.",
+    "rank": "#",
+    "name": "Player",
+    "time": "Time",
+    "activeTime": "Active time",
+    "rebirths": "Rebirths",
+    "trophies": "Trophies",
+    "score": "Money earned",
+    "empty": "No runs recorded yet. Be the first!",
+    "loading": "Loading leaderboard…",
+    "error": "Couldn't load the leaderboard.",
+    "refresh": "Refresh",
+    "sort": {
+      "active": "🎮 Active time",
+      "rebirths": "🔄 Rebirths",
+      "score": "💰 Money",
+      "trophies": "🏆 Trophies"
+    }
+  },
+  "achievements": {
+    "click_1": { "name": "First Step", "description": "Make your first click" },
+    "click_10": { "name": "New Player", "description": "Reach 10 clicks" },
+    "click_100": { "name": "Warming Up", "description": "Reach 100 clicks" },
+    "click_1000": { "name": "Marathoner", "description": "Reach 1,000 clicks" },
+    "click_10000": { "name": "Regular", "description": "Reach 10,000 clicks" },
+    "click_100000": { "name": "Fast Fingers", "description": "Reach 100,000 clicks" },
+    "click_1000000": { "name": "Relentless", "description": "Reach 1,000,000 clicks" },
+    "click_100000000": { "name": "Infinite?", "description": "Reach 100,000,000 clicks" },
+    "upgrade_first": { "name": "Upgrader", "description": "Buy your first upgrade" },
+    "upgrade_5": { "name": "Sunday Engineer", "description": "Own 5 upgrade levels" },
+    "upgrade_10": { "name": "Collector", "description": "Own 10 upgrade levels" },
+    "upgrade_50": { "name": "Industrialist", "description": "Own 50 upgrade levels" },
+    "upgrade_screen": { "name": "Supreme Geek", "description": "Buy the 'HD Screen' upgrade" },
+    "upgrade_robot": { "name": "Machine Master", "description": "Buy a 'Clicker Robot'" },
+    "upgrade_satellite": { "name": "World Domination", "description": "Buy the 'Ad Satellite'" },
+    "upgrade_network": { "name": "Connected", "description": "Buy the 'Planetary Network'" },
+    "upgrade_dimension": { "name": "Multiverse", "description": "Buy 'Parallel Dimension'" },
+    "upgrade_divine": { "name": "Click God", "description": "Buy 'Divine Click'" },
+    "cps_100": { "name": "Automation", "description": "Reach 100 earnings per second" },
+    "cps_10000": { "name": "Production Line", "description": "Reach 10,000 earnings per second" },
+    "cps_1000000": { "name": "Giant Factory", "description": "Reach 1,000,000 earnings per second" },
+    "cps_100000000": { "name": "Economic Singularity", "description": "Reach 100,000,000 earnings per second" },
+    "rebirth_1": { "name": "Rebirth", "description": "Perform your first rebirth" },
+    "rebirth_2": { "name": "Second Chance", "description": "Reach 2 rebirths" },
+    "rebirth_3": { "name": "Time Traveler", "description": "Reach 3 rebirths" },
+    "rebirth_5": { "name": "Eternal Cycle", "description": "Reach 5 rebirths" },
+    "rebirth_10": { "name": "Immortal", "description": "Reach 10 rebirths" },
+    "rebirth_20": { "name": "Cosmic Rebirth", "description": "Reach 20 rebirths" },
+    "rebirth_50": { "name": "Ascension", "description": "Reach 50 rebirths" },
+    "wealth_1k": { "name": "Small Wallet", "description": "Earn $1,000 in total" },
+    "wealth_10k": { "name": "Big Player", "description": "Earn $10,000 in total" },
+    "wealth_1m": { "name": "Big Investor", "description": "Earn $1,000,000 in total" },
+    "wealth_10m": { "name": "Multi-Millionaire", "description": "Earn $10,000,000 in total" },
+    "wealth_1b": { "name": "Tycoon", "description": "Earn $1,000,000,000 in total" },
+    "wealth_10b": { "name": "Financial Empire", "description": "Earn $10,000,000,000 in total" },
+    "wealth_1t": { "name": "King of Capitalism", "description": "Earn $1 trillion in total" },
+    "wealth_1q": { "name": "Global Billionaire", "description": "Earn $1 quadrillion in total" },
+    "playtime_10m": { "name": "First Steps", "description": "Play for 10 cumulative minutes" },
+    "playtime_30m": { "name": "Settled In", "description": "Play for 30 cumulative minutes" },
+    "session_1h": { "name": "All-Nighter", "description": "Play continuously for 1 hour" },
+    "playtime_3h": { "name": "Marathon", "description": "Play for 3 cumulative hours" },
+    "active_1h": { "name": "Always On Screen", "description": "Keep the game window active and in focus for 1 hour" },
+    "afk_master": { "name": "AFK Master", "description": "Stay 10 minutes without clicking" },
+    "speed_click": { "name": "Speed Rabbit", "description": "Make 100 clicks in 15 seconds" },
+    "hyper_click": { "name": "Machine Gun", "description": "Make 300 clicks in 15 seconds" },
+    "speed_first_rebirth": { "name": "Lightning", "description": "Reach your first rebirth in under 90 seconds" },
+    "rebirth_chain": { "name": "No Mercy", "description": "Chain two rebirths within 30 seconds" },
+    "maxed_all": { "name": "Perfectionist", "description": "Get all 15 upgrades to level 5 at the same time" },
+    "big_spender": { "name": "Big Spender", "description": "Spend $1 trillion in total on upgrades" },
+    "leaderboard_submit": { "name": "On the Board", "description": "Submit a run to the online leaderboard" },
+    "leaderboard_top3": { "name": "On the Podium", "description": "Finish in the leaderboard's top 3" },
+    "leaderboard_top1": { "name": "Number One", "description": "Finish 1st on the leaderboard" },
+    "trophy_master": { "name": "Trophy Hunter", "description": "Unlock 35 trophies" },
+    "secret_konami": { "name": "Secret Code", "description": "??? — an old code might ring a bell" }
+  }
+}

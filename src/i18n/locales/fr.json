@@ -1,0 +1,156 @@
+{
+  "app": {
+    "title": "Clicker Game"
+  },
+  "topbar": {
+    "settings": "Réglages",
+    "trophies": "Trophées",
+    "leaderboard": "Classement"
+  },
+  "start": {
+    "title": "Règles du jeu",
+    "cta": "Commencer",
+    "rules": [
+      { "title": "Gameplay", "desc": "Clique pour gagner de l’argent et améliorer tes équipements. Chaque amélioration augmente tes gains par seconde (CPS)." },
+      { "title": "Objectifs & Trophées", "desc": "Atteins les objectifs pour débloquer des trophées uniques et suivre ta progression." },
+      { "title": "Rebirth", "desc": "Réinitialise tes améliorations mais reçois un bonus permanent au clic pour progresser plus vite et grimper dans le classement." },
+      { "title": "Timer & Classement", "desc": "Le classement récompense le temps de jeu actif : plus tu restes à jouer, mieux tu grimpes." },
+      { "title": "Mobile", "desc": "Accède aux améliorations directement depuis ton mobile et continue de progresser où que tu sois." }
+    ]
+  },
+  "game": {
+    "timer": "Temps",
+    "perSecond": "/ sec",
+    "rebirthCount": "Rebirth",
+    "upgradesTitle": "Améliorations",
+    "rebirthLabel": "Rebirth",
+    "rebirthPerClick": "+3 / clic",
+    "level": "Niv. {level}",
+    "submitPrompt": "Enregistrer ton run dans le classement ?",
+    "updatePrompt": "Mettre à jour ton run dans le classement avec ta progression actuelle ?",
+    "namePlaceholder": "Ton pseudo",
+    "submit": "Envoyer",
+    "update": "Mettre à jour",
+    "submitted": "Run envoyé au classement !",
+    "updated": "Run mis à jour !",
+    "autoUpdateHint": "Ton run se met à jour automatiquement toutes les 5 minutes.",
+    "submitError": "Impossible d'envoyer ton score pour le moment.",
+    "upgradeNames": [
+      "Clavier Cassé", "Souris Gaming", "Écran HD", "Serveur Local", "Ferme de PC",
+      "Data Center", "Robot Clickeur", "IA Optimisée", "Crypto Rig", "Satellite Publicitaire",
+      "Supercalculateur Quantique", "Station Spatiale", "Réseau Planétaire", "Dimension Parallèle", "Clic Divin"
+    ]
+  },
+  "settings": {
+    "title": "Réglages",
+    "language": "Langue",
+    "reset": "Réinitialiser la progression",
+    "resetConfirm": "Tout ta progression (argent, améliorations, trophées) sera perdue. Confirmer ?",
+    "resetDone": "Progression réinitialisée."
+  },
+  "trophies": {
+    "title": "Trophées",
+    "unlockedOf": "{unlocked} / {total} débloqués",
+    "points": "{points} points de trophée",
+    "filters": {
+      "all": "Tous"
+    },
+    "categories": {
+      "basics": "Progression",
+      "upgrades": "Améliorations",
+      "rebirth": "Rebirth",
+      "wealth": "Fortune",
+      "time": "Temps de jeu",
+      "fun": "Défis",
+      "secret": "Secrets"
+    },
+    "tiers": {
+      "bronze": "Bronze",
+      "silver": "Argent",
+      "gold": "Or",
+      "legendary": "Légendaire"
+    },
+    "reward": {
+      "click": "+{percent}% de clics à vie",
+      "cps": "+{percent}% de gains/sec à vie",
+      "both": "+{percent}% de clics et gains/sec à vie"
+    }
+  },
+  "leaderboard": {
+    "title": "Classement",
+    "subtitle": "Classement des meilleurs runs, par catégorie. Argent et trophées comptent la progression cumulée sur tous tes rebirths.",
+    "rank": "#",
+    "name": "Joueur",
+    "time": "Temps",
+    "activeTime": "Temps actif",
+    "rebirths": "Rebirths",
+    "trophies": "Trophées",
+    "score": "Argent gagné",
+    "empty": "Aucun run enregistré pour l'instant. Sois le premier !",
+    "loading": "Chargement du classement…",
+    "error": "Impossible de charger le classement.",
+    "refresh": "Actualiser",
+    "sort": {
+      "active": "🎮 Temps actif",
+      "rebirths": "🔄 Rebirths",
+      "score": "💰 Argent",
+      "trophies": "🏆 Trophées"
+    }
+  },
+  "achievements": {
+    "click_1": { "name": "Premier pas", "description": "Fais ton premier clic" },
+    "click_10": { "name": "Nouveau joueur", "description": "Atteins 10 clics" },
+    "click_100": { "name": "Échauffement", "description": "Atteins 100 clics" },
+    "click_1000": { "name": "Marathonien", "description": "Atteins 1 000 clics" },
+    "click_10000": { "name": "Habitué", "description": "Atteins 10 000 clics" },
+    "click_100000": { "name": "Doigts de feu", "description": "Atteins 100 000 clics" },
+    "click_1000000": { "name": "Forcené", "description": "Atteins 1 000 000 clics" },
+    "click_100000000": { "name": "Infini ?", "description": "Atteins 100 000 000 clics" },
+    "upgrade_first": { "name": "Upgradeur", "description": "Achète ta première amélioration" },
+    "upgrade_5": { "name": "Ingénieur du dimanche", "description": "Possède 5 niveaux d'améliorations" },
+    "upgrade_10": { "name": "Collectionneur", "description": "Possède 10 niveaux d'améliorations" },
+    "upgrade_50": { "name": "Industriel", "description": "Possède 50 niveaux d'améliorations" },
+    "upgrade_screen": { "name": "Geek suprême", "description": "Achète l'amélioration 'Écran HD'" },
+    "upgrade_robot": { "name": "Maître des machines", "description": "Achète un 'Robot Clickeur'" },
+    "upgrade_satellite": { "name": "Domination mondiale", "description": "Achète le 'Satellite Publicitaire'" },
+    "upgrade_network": { "name": "Connecté", "description": "Achète le 'Réseau Planétaire'" },
+    "upgrade_dimension": { "name": "Multivers", "description": "Achète 'Dimension Parallèle'" },
+    "upgrade_divine": { "name": "Dieu du clic", "description": "Achète 'Clic Divin'" },
+    "cps_100": { "name": "Automatisation", "description": "Atteins 100 gains par seconde" },
+    "cps_10000": { "name": "Chaîne de production", "description": "Atteins 10 000 gains par seconde" },
+    "cps_1000000": { "name": "Usine géante", "description": "Atteins 1 000 000 gains par seconde" },
+    "cps_100000000": { "name": "Singularité économique", "description": "Atteins 100 000 000 gains par seconde" },
+    "rebirth_1": { "name": "Renaissance", "description": "Effectue ton premier rebirth" },
+    "rebirth_2": { "name": "Deuxième chance", "description": "Atteins 2 rebirths" },
+    "rebirth_3": { "name": "Voyageur temporel", "description": "Atteins 3 rebirths" },
+    "rebirth_5": { "name": "Cycle éternel", "description": "Atteins 5 rebirths" },
+    "rebirth_10": { "name": "Immortel", "description": "Atteins 10 rebirths" },
+    "rebirth_20": { "name": "Renaissance cosmique", "description": "Atteins 20 rebirths" },
+    "rebirth_50": { "name": "Ascension", "description": "Atteins 50 rebirths" },
+    "wealth_1k": { "name": "Petit portefeuille", "description": "Accumule 1 000 $ au total" },
+    "wealth_10k": { "name": "Gros joueur", "description": "Accumule 10 000 $ au total" },
+    "wealth_1m": { "name": "Gros investisseur", "description": "Accumule 1 000 000 $ au total" },
+    "wealth_10m": { "name": "Riche à millions", "description": "Accumule 10 000 000 $ au total" },
+    "wealth_1b": { "name": "Magnat", "description": "Accumule 1 000 000 000 $ au total" },
+    "wealth_10b": { "name": "Empire financier", "description": "Accumule 10 000 000 000 $ au total" },
+    "wealth_1t": { "name": "Roi du capitalisme", "description": "Accumule 1 000 milliards $ au total" },
+    "wealth_1q": { "name": "Billionnaire mondial", "description": "Accumule 1 quadrillion $ au total" },
+    "playtime_10m": { "name": "Premiers pas", "description": "Joue pendant 10 minutes cumulées" },
+    "playtime_30m": { "name": "Bien installé", "description": "Joue pendant 30 minutes cumulées" },
+    "session_1h": { "name": "Nuit blanche", "description": "Joue en continu pendant 1 heure" },
+    "playtime_3h": { "name": "Marathon", "description": "Joue pendant 3 heures cumulées" },
+    "active_1h": { "name": "Toujours à l'écran", "description": "Reste 1 heure la fenêtre du jeu active et au premier plan" },
+    "afk_master": { "name": "AFK Master", "description": "Reste 10 minutes sans cliquer" },
+    "speed_click": { "name": "Lapin pressé", "description": "Fais 100 clics en 15 secondes" },
+    "hyper_click": { "name": "Mitraillette", "description": "Fais 300 clics en 15 secondes" },
+    "speed_first_rebirth": { "name": "Éclair", "description": "Atteins ton premier rebirth en moins de 90 secondes" },
+    "rebirth_chain": { "name": "Sans pitié", "description": "Enchaîne deux rebirths en moins de 30 secondes" },
+    "maxed_all": { "name": "Perfectionniste", "description": "Monte les 15 améliorations au niveau 5 en même temps" },
+    "big_spender": { "name": "Dépensier", "description": "Dépense 1 000 milliards $ au total en améliorations" },
+    "leaderboard_submit": { "name": "Sur les tablettes", "description": "Envoie un run au classement en ligne" },
+    "leaderboard_top3": { "name": "Sur le podium", "description": "Termine dans le top 3 du classement" },
+    "leaderboard_top1": { "name": "Numéro 1", "description": "Termine 1er du classement" },
+    "trophy_master": { "name": "Chasseur de trophées", "description": "Débloque 35 trophées" },
+    "secret_konami": { "name": "Code secret", "description": "??? — un vieux code te dit peut-être quelque chose" }
+  }
+}

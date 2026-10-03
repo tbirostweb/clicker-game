@@ -1,0 +1,6 @@
+Backend
+node_modules
+dist
+.git
+.idea
+.DS_Store

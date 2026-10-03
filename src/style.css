@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0b0e14;
+  --color-bg-alt: #0f131c;
+  --color-panel: #12161f;
+  --color-panel-alt: #171c27;
+  --color-border: #262b38;
+  --color-ink: #f4f6fb;
+  --color-muted: #8892a6;
+
+  --color-accent: #f5b642;
+  --color-accent-strong: #ffcf6b;
+  --color-accent-soft: #f5b64226;
+
+  --color-prestige: #a78bfa;
+  --color-prestige-strong: #c4b5fd;
+  --color-prestige-soft: #a78bfa26;
+
+  --color-success: #4ade80;
+  --color-success-soft: #4ade8026;
+
+  --color-tier-bronze: #cd7f32;
+  --color-tier-silver: #b9c2d0;
+  --color-tier-gold: #f5b642;
+  --color-tier-legendary: #c4b5fd;
+
+  --font-display: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-bg);
+}
+
+@keyframes scale-up {
+  0% { transform: scale(0.92); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-scale-up {
+  animation: scale-up 0.2s ease-out forwards;
+}
+
+@keyframes slow-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.animate-slow-spin {
+  animation: slow-spin 4s linear infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--color-accent-soft); }
+  50% { box-shadow: 0 0 0 8px transparent; }
+}
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 9999px;
+}
