@@ -1,4 +1,7 @@
 {
+  "common": {
+    "close": "Close"
+  },
   "app": {
     "title": "Clicker Game"
   },
@@ -45,8 +48,15 @@
     "title": "Settings",
     "language": "Language",
     "reset": "Reset progress",
-    "resetConfirm": "All your progress (money, upgrades, trophies) will be lost. Confirm?",
-    "resetDone": "Progress reset."
+    "resetConfirm": "All your progress (money, upgrades, trophies) on this device will be lost. A run you published on the leaderboard is NOT deleted: use “Withdraw my run from the leaderboard” first if you want. Confirm?",
+    "resetDone": "Progress reset on this device.",
+    "withdraw": "Withdraw my run from the leaderboard",
+    "withdrawConfirm": "Your run (name and stats) will be deleted from the public leaderboard. Confirm?",
+    "withdrawDone": "Your run has been removed from the leaderboard.",
+    "withdrawError": "Couldn't withdraw your run right now. Please try again later.",
+    "withdrawUnavailable": "No run can be withdrawn from this device. For a run sent from another device or before this version, use the contact given on the Privacy page.",
+    "saveFailed": "Your progress can't be saved on this device (storage full or disabled).",
+    "privacy": "Legal notice & privacy"
   },
   "trophies": {
     "title": "Trophies",
@@ -86,6 +96,10 @@
     "rebirths": "Rebirths",
     "trophies": "Trophies",
     "score": "Money earned",
+    "unverified": "Unverified leaderboard: scores are reported by players' browsers.",
+    "publicNotice": "Submitting your run publicly shows your name, stats and date. It's optional and you can withdraw it anytime from Settings.",
+    "nameLabel": "Name (2 to 20 characters)",
+    "sending": "Sending…",
     "empty": "No runs recorded yet. Be the first!",
     "loading": "Loading leaderboard…",
     "error": "Couldn't load the leaderboard.",
@@ -96,6 +110,24 @@
       "score": "💰 Money",
       "trophies": "🏆 Trophies"
     }
+  },
+  "privacy": {
+    "title": "Legal notice & privacy",
+    "editorTitle": "Publisher and hosting",
+    "editor": "Publisher: [TO BE COMPLETED: publisher identity (name or company), address, contact].",
+    "director": "Publication director: [TO BE COMPLETED].",
+    "host": "Host: [TO BE COMPLETED: hosting provider name, address and phone].",
+    "dataTitle": "Data processed",
+    "dataLocal": "On your device (browser local storage, no cookies): your progress, your language, and for a published run its id and a secret token used to update or withdraw it. This data stays on your device, except when you submit to the leaderboard.",
+    "dataLeaderboard": "Leaderboard (optional): name, rebirths, money earned, play time, active time, trophy count and submission date. This information is public. Don't use your real name.",
+    "dataLogs": "Server technical logs: IP address, date, request and response code, for security and abuse prevention.",
+    "noTracking": "No advertising cookies, analytics or third-party trackers are used.",
+    "purposeTitle": "Purposes, legal basis and retention",
+    "purpose": "Purpose: display the game leaderboard and protect the service against abuse. Legal basis: [TO BE COMPLETED: legal basis chosen by the publisher].",
+    "retention": "Retention: leaderboard runs [TO BE COMPLETED]; technical logs [TO BE COMPLETED].",
+    "rightsTitle": "Your rights",
+    "rights": "You can withdraw your run anytime from Settings → “Withdraw my run from the leaderboard”. For any other request (access, rectification, erasure of a run sent from another device, objection): [TO BE COMPLETED: contact]. You may also lodge a complaint with your data protection authority (in France: CNIL, cnil.fr).",
+    "resetNote": "“Reset progress” only erases data on this device."
   },
   "achievements": {
     "click_1": { "name": "First Step", "description": "Make your first click" },

@@ -1,8 +1,20 @@
 vendor
-var/cache
-var/log
-.env.local
-.env.*.local
+var
+# Never ship local env files or secrets in the image: runtime values come
+# from Dokploy environment variables.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.sql
+*.sql.gz
+*.dump
+*.bak
+*.backup
+*.sqlite*
+*.log
+tests
 .git
 .idea
 .DS_Store

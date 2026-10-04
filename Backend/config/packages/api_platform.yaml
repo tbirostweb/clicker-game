@@ -3,10 +3,19 @@ api_platform:
     title: Game - API
     version: 1.0.0
     show_webby: false
+    # No #[ApiResource] exists (src/ApiResource is empty, the leaderboard is
+    # served by App\Controller\PlayerController): GraphQL and the generated
+    # docs/entrypoint only widen the public surface, so they are disabled.
     graphql:
-        enabled: true
+        enabled: false
+        graphiql:
+            enabled: false
+    enable_swagger: false
+    enable_swagger_ui: false
+    enable_re_doc: false
+    enable_entrypoint: false
+    enable_docs: false
     defaults:
         stateless: true
         cache_headers:
             vary: ['Content-Type', 'Authorization', 'Origin']
-

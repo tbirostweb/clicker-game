@@ -8,7 +8,7 @@ import { useGameState } from '../composables/useGameState.js'
 import { formatNumber, formatDuration } from '../utils/format.js'
 
 const { t } = useI18n()
-const { showLeaderboard, rebirth, leaderboardRunId, leaderboardPlayerName, submitCurrentRun, setLeaderboardRank } = useGameState()
+const { showLeaderboard, rebirth, leaderboardRunId, leaderboardPlayerName, submitCurrentRun, setLeaderboardRank, openPrivacy } = useGameState()
 
 const SORTS = ['active', 'rebirths', 'score', 'trophies']
 
@@ -44,6 +44,8 @@ function selectSort(sort) {
 }
 
 async function onSubmit() {
+  // Busy guard: ignore re-entrant submits (double click, Enter + click).
+  if (submitState.value === 'sending') return
   if (!playerName.value.trim()) return
   submitState.value = 'sending'
   const isUpdate = !!leaderboardRunId.value
@@ -71,12 +73,15 @@ async function onSubmit() {
   </BaseButton>
 
   <Modal v-if="showLeaderboard" :title="t('leaderboard.title')" max-width="max-w-2xl" @close="showLeaderboard = false">
-    <p class="text-sm text-muted mb-4">{{ t('leaderboard.subtitle') }}</p>
+    <p class="text-sm text-muted mb-2">{{ t('leaderboard.subtitle') }}</p>
+    <p class="text-xs text-muted mb-4">⚠️ {{ t('leaderboard.unverified') }}</p>
 
     <div class="flex flex-wrap gap-2 mb-4">
       <button
           v-for="sort in SORTS"
           :key="sort"
+          type="button"
+          :aria-pressed="activeSort === sort"
           @click="selectSort(sort)"
           :class="[
             'px-3 py-1.5 rounded-full text-xs font-semibold border transition',
@@ -89,24 +94,32 @@ async function onSubmit() {
 
     <div v-if="rebirth >= 1" class="mb-5 p-4 rounded-xl border border-accent/40 bg-accent-soft space-y-3">
       <p class="text-sm font-semibold text-ink">{{ leaderboardRunId ? t('game.updatePrompt') : t('game.submitPrompt') }}</p>
-      <div class="flex gap-2">
+      <p class="text-xs text-muted">
+        {{ t('leaderboard.publicNotice') }}
+        <button type="button" class="underline hover:text-ink" @click="openPrivacy">{{ t('settings.privacy') }}</button>
+      </p>
+      <form class="flex gap-2" @submit.prevent="onSubmit">
+        <label for="leaderboard-name" class="sr-only">{{ t('leaderboard.nameLabel') }}</label>
         <input
+            id="leaderboard-name"
             v-model="playerName"
+            autocomplete="nickname"
+            minlength="2"
             :placeholder="t('game.namePlaceholder')"
             maxlength="20"
             class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-panel border border-border text-ink text-sm focus:outline-none focus:border-accent"
         />
-        <BaseButton size="sm" :disabled="submitState === 'sending'" @click="onSubmit">
-          {{ leaderboardRunId ? t('game.update') : t('game.submit') }}
+        <BaseButton type="submit" size="sm" :disabled="submitState === 'sending'" :aria-busy="submitState === 'sending'">
+          {{ submitState === 'sending' ? t('leaderboard.sending') : (leaderboardRunId ? t('game.update') : t('game.submit')) }}
         </BaseButton>
-      </div>
-      <p v-if="submitState === 'done'" class="text-xs text-success">{{ wasUpdate ? t('game.updated') : t('game.submitted') }}</p>
-      <p v-if="submitState === 'error'" class="text-xs text-red-400">{{ t('game.submitError') }}</p>
+      </form>
+      <p role="status" aria-live="polite" class="text-xs text-success empty:hidden">{{ submitState === 'done' ? (wasUpdate ? t('game.updated') : t('game.submitted')) : '' }}</p>
+      <p role="alert" class="text-xs text-red-400 empty:hidden">{{ submitState === 'error' ? t('game.submitError') : '' }}</p>
       <p v-if="leaderboardRunId" class="text-xs text-muted">{{ t('game.autoUpdateHint') }}</p>
     </div>
 
-    <div v-if="loading" class="text-center text-muted text-sm py-8">{{ t('leaderboard.loading') }}</div>
-    <div v-else-if="error" class="text-center text-red-400 text-sm py-8">{{ t('leaderboard.error') }}</div>
+    <div v-if="loading" role="status" class="text-center text-muted text-sm py-8">{{ t('leaderboard.loading') }}</div>
+    <div v-else-if="error" role="alert" class="text-center text-red-400 text-sm py-8">{{ t('leaderboard.error') }}</div>
     <div v-else-if="runs.length === 0" class="text-center text-muted text-sm py-8">{{ t('leaderboard.empty') }}</div>
     <div v-else class="overflow-x-auto">
       <table class="w-full text-sm">

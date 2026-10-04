@@ -1,4 +1,7 @@
 {
+  "common": {
+    "close": "Fermer"
+  },
   "app": {
     "title": "Clicker Game"
   },
@@ -45,8 +48,15 @@
     "title": "Réglages",
     "language": "Langue",
     "reset": "Réinitialiser la progression",
-    "resetConfirm": "Tout ta progression (argent, améliorations, trophées) sera perdue. Confirmer ?",
-    "resetDone": "Progression réinitialisée."
+    "resetConfirm": "Toute ta progression (argent, améliorations, trophées) sera perdue sur cet appareil. Ton éventuel run publié dans le classement n’est PAS supprimé : utilise « Retirer mon run du classement » avant si tu le souhaites. Confirmer ?",
+    "resetDone": "Progression réinitialisée sur cet appareil.",
+    "withdraw": "Retirer mon run du classement",
+    "withdrawConfirm": "Ton run (pseudo et statistiques) sera supprimé du classement public. Confirmer ?",
+    "withdrawDone": "Ton run a été retiré du classement.",
+    "withdrawError": "Impossible de retirer ton run pour le moment. Réessaie plus tard.",
+    "withdrawUnavailable": "Aucun run supprimable depuis cet appareil. Pour un run envoyé depuis un autre appareil ou avant cette version, utilise le contact indiqué dans la page Confidentialité.",
+    "saveFailed": "Ta progression ne peut pas être sauvegardée sur cet appareil (stockage plein ou désactivé).",
+    "privacy": "Mentions légales et confidentialité"
   },
   "trophies": {
     "title": "Trophées",
@@ -86,6 +96,10 @@
     "rebirths": "Rebirths",
     "trophies": "Trophées",
     "score": "Argent gagné",
+    "unverified": "Classement non vérifié : les scores sont déclarés par le navigateur des joueurs.",
+    "publicNotice": "En envoyant ton run, ton pseudo, tes statistiques et la date sont affichés publiquement. C’est facultatif et tu peux le retirer à tout moment depuis les Réglages.",
+    "nameLabel": "Pseudo (2 à 20 caractères)",
+    "sending": "Envoi en cours…",
     "empty": "Aucun run enregistré pour l'instant. Sois le premier !",
     "loading": "Chargement du classement…",
     "error": "Impossible de charger le classement.",
@@ -96,6 +110,24 @@
       "score": "💰 Argent",
       "trophies": "🏆 Trophées"
     }
+  },
+  "privacy": {
+    "title": "Mentions légales et confidentialité",
+    "editorTitle": "Éditeur et hébergement",
+    "editor": "Éditeur du site : [À COMPLÉTER : identité de l’éditeur (nom ou raison sociale), adresse, contact].",
+    "director": "Directeur de la publication : [À COMPLÉTER].",
+    "host": "Hébergeur : [À COMPLÉTER : nom, adresse et téléphone de l’hébergeur].",
+    "dataTitle": "Données traitées",
+    "dataLocal": "Sur ton appareil (stockage local du navigateur, pas de cookie) : ta progression, ta langue, et pour un run publié son identifiant et un jeton secret permettant de le modifier ou de le retirer. Ces données ne quittent pas ton appareil, sauf lors de l’envoi au classement.",
+    "dataLeaderboard": "Classement (facultatif) : pseudo, rebirths, argent gagné, temps de jeu, temps actif, nombre de trophées et date d’envoi. Ces informations sont publiques. N’utilise pas ton vrai nom.",
+    "dataLogs": "Journaux techniques du serveur : adresse IP, date, requête et code de réponse, pour la sécurité et la lutte contre les abus.",
+    "noTracking": "Aucun cookie publicitaire, aucun outil de mesure d’audience ni traceur tiers n’est utilisé.",
+    "purposeTitle": "Finalités, base légale et durée",
+    "purpose": "Finalité : afficher le classement du jeu et protéger le service contre les abus. Base légale : [À COMPLÉTER : base légale retenue par l’éditeur].",
+    "retention": "Durée de conservation : runs du classement [À COMPLÉTER] ; journaux techniques [À COMPLÉTER].",
+    "rightsTitle": "Tes droits",
+    "rights": "Tu peux retirer ton run à tout moment depuis Réglages → « Retirer mon run du classement ». Pour toute autre demande (accès, rectification, effacement d’un run envoyé depuis un autre appareil, opposition) : [À COMPLÉTER : contact]. Tu peux aussi introduire une réclamation auprès de la CNIL (cnil.fr).",
+    "resetNote": "« Réinitialiser la progression » efface uniquement les données de cet appareil."
   },
   "achievements": {
     "click_1": { "name": "Premier pas", "description": "Fais ton premier clic" },

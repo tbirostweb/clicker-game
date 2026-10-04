@@ -6,10 +6,11 @@ import Trophy from './components/Trophy.vue'
 import Leaderboard from './components/Leaderboard.vue'
 import Jeu from './components/jeu.vue'
 import Start from './components/Start.vue'
+import Confidentialite from './components/Confidentialite.vue'
 import { useGameState } from './composables/useGameState.js'
 
 const { t } = useI18n()
-const { gameStarted, unlockKonami } = useGameState()
+const { gameStarted, unlockKonami, saveFailed } = useGameState()
 
 // Easter egg trophy: the classic Konami code.
 const KONAMI_SEQUENCE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a']
@@ -45,10 +46,15 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
       </div>
     </header>
 
+    <p v-if="saveFailed" role="alert" class="px-4 py-2 text-xs text-center bg-red-500/15 text-red-300 border-b border-red-400/40">
+      {{ t('settings.saveFailed') }}
+    </p>
+
     <main class="flex-1 overflow-y-auto">
       <Jeu />
     </main>
   </div>
 
   <Start v-if="!gameStarted" />
+  <Confidentialite />
 </template>

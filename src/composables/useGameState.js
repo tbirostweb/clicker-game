@@ -2,7 +2,8 @@ import { ref, reactive, computed } from 'vue'
 import { UPGRADE_BASE, UPGRADE_MULTIPLIER, REBIRTH_BASE_PRICE } from '../data/upgrades.js'
 import { achievements as achievementDefs } from '../data/achievements.js'
 import { useGameSave } from './useGameSave.js'
-import { submitRun, updateRun } from '../services/api.js'
+import { sanitizeSave, SAVE_SCHEMA_VERSION } from './saveSchema.js'
+import { submitRun, updateRun, deleteRun, newIdempotencyKey } from '../services/api.js'
 
 const SAVE_KEY = 'clicker-save-v1'
 const SPEED_CLICK_WINDOW_MS = 15_000
@@ -28,6 +29,12 @@ const activePlaySeconds = ref(0) // sessionElapsedSeconds minus time the tab/win
 const unlockedIds = reactive(new Set())
 const leaderboardSubmitted = ref(false)
 const leaderboardRunId = ref(null)
+// Secret proof of ownership returned once by the API at creation. Stored
+// locally only (never displayed/sent elsewhere than this API).
+const leaderboardEditToken = ref(null)
+// Idempotency-Key of a creation not yet acknowledged, reused on retry so a
+// network error cannot create duplicate runs.
+const leaderboardPendingKey = ref(null)
 const leaderboardPlayerName = ref('')
 const leaderboardRank = ref(null)
 const konamiUnlocked = ref(false)
@@ -40,11 +47,17 @@ const idleMs = ref(0)
 const showTrophy = ref(false)
 const showLeaderboard = ref(false)
 const showSettings = ref(false)
+const showPrivacy = ref(false)
+const saveFailed = ref(false) // localStorage unavailable/full: progress not persisted
 
-const { load, scheduleSave, reset: clearSave } = useGameSave(SAVE_KEY)
+const { load, scheduleSave, flush: flushSave, reset: clearSave } = useGameSave(SAVE_KEY, {
+  onError: () => { saveFailed.value = true },
+  onSuccess: () => { saveFailed.value = false },
+})
 
 function snapshot() {
   return {
+    schemaVersion: SAVE_SCHEMA_VERSION,
     counter: counter.value,
     totalEarned: totalEarned.value,
     totalSpent: totalSpent.value,
@@ -58,6 +71,8 @@ function snapshot() {
     unlockedIds: Array.from(unlockedIds),
     leaderboardSubmitted: leaderboardSubmitted.value,
     leaderboardRunId: leaderboardRunId.value,
+    leaderboardEditToken: leaderboardEditToken.value,
+    leaderboardPendingKey: leaderboardPendingKey.value,
     leaderboardPlayerName: leaderboardPlayerName.value,
     leaderboardRank: leaderboardRank.value,
     konamiUnlocked: konamiUnlocked.value,
@@ -69,26 +84,32 @@ function persist() {
 }
 
 function restore() {
-  const data = load()
+  // Validated, versioned restore: a corrupted, partial or outdated save
+  // falls back to defaults field by field instead of breaking the game.
+  const data = sanitizeSave(load(), {
+    upgradeBase: UPGRADE_BASE,
+    multiplier: UPGRADE_MULTIPLIER,
+    knownAchievementIds: achievementDefs.map((def) => def.id),
+  })
   if (!data) return
-  counter.value = data.counter ?? 0
-  totalEarned.value = data.totalEarned ?? 0
-  totalSpent.value = data.totalSpent ?? 0
-  totalClicks.value = data.totalClicks ?? 0
-  upgrades.value = Array.isArray(data.upgrades) && data.upgrades.length === UPGRADE_BASE.length
-    ? data.upgrades
-    : freshUpgrades()
-  rebirth.value = data.rebirth ?? 0
-  rebirthTimestamps.value = data.rebirthTimestamps ?? []
-  gameStarted.value = data.gameStarted ?? false
-  sessionElapsedSeconds.value = data.sessionElapsedSeconds ?? 0
-  activePlaySeconds.value = data.activePlaySeconds ?? 0
-  ;(data.unlockedIds ?? []).forEach((id) => unlockedIds.add(id))
-  leaderboardSubmitted.value = data.leaderboardSubmitted ?? false
-  leaderboardRunId.value = data.leaderboardRunId ?? null
-  leaderboardPlayerName.value = data.leaderboardPlayerName ?? ''
-  leaderboardRank.value = data.leaderboardRank ?? null
-  konamiUnlocked.value = data.konamiUnlocked ?? false
+  counter.value = data.counter
+  totalEarned.value = data.totalEarned
+  totalSpent.value = data.totalSpent
+  totalClicks.value = data.totalClicks
+  upgrades.value = data.upgrades
+  rebirth.value = data.rebirth
+  rebirthTimestamps.value = data.rebirthTimestamps
+  gameStarted.value = data.gameStarted
+  sessionElapsedSeconds.value = data.sessionElapsedSeconds
+  activePlaySeconds.value = data.activePlaySeconds
+  data.unlockedIds.forEach((id) => unlockedIds.add(id))
+  leaderboardSubmitted.value = data.leaderboardSubmitted
+  leaderboardRunId.value = data.leaderboardRunId
+  leaderboardEditToken.value = data.leaderboardEditToken
+  leaderboardPendingKey.value = data.leaderboardPendingKey
+  leaderboardPlayerName.value = data.leaderboardPlayerName
+  leaderboardRank.value = data.leaderboardRank
+  konamiUnlocked.value = data.konamiUnlocked
 }
 
 const rebirthPrice = computed(() => (rebirth.value + 1) * REBIRTH_BASE_PRICE)
@@ -136,6 +157,7 @@ const fastestRebirthGapMs = computed(() => {
 
 function buildAchievementState() {
   return {
+    schemaVersion: SAVE_SCHEMA_VERSION,
     counter: counter.value,
     totalEarned: totalEarned.value,
     totalSpent: totalSpent.value,
@@ -209,7 +231,27 @@ function startGame() {
   persist()
 }
 
-function submitCurrentRun(name) {
+let leaderboardInFlight = null
+
+function clearLeaderboardRun() {
+  leaderboardSubmitted.value = false
+  leaderboardRunId.value = null
+  leaderboardEditToken.value = null
+  leaderboardRank.value = null
+}
+
+async function createRun(payload) {
+  if (!leaderboardPendingKey.value) {
+    leaderboardPendingKey.value = newIdempotencyKey()
+    persist()
+  }
+  const result = await submitRun(payload, leaderboardPendingKey.value)
+  leaderboardEditToken.value = result.editToken ?? null
+  leaderboardPendingKey.value = null
+  return result
+}
+
+async function sendRun(name) {
   const payload = {
     name,
     rebirths: rebirth.value,
@@ -218,28 +260,67 @@ function submitCurrentRun(name) {
     activeSeconds: activePlaySeconds.value,
     trophies: unlockedIds.size,
   }
+
   // Refresh the same leaderboard row in place once a first run exists,
   // instead of freezing the entry at whatever the state was at first
   // submission (e.g. only 1 rebirth) every time the player keeps playing.
-  const request = leaderboardRunId.value
-    ? updateRun(leaderboardRunId.value, payload)
-    : submitRun(payload)
+  let result
+  if (leaderboardRunId.value && leaderboardEditToken.value) {
+    try {
+      result = await updateRun(leaderboardRunId.value, leaderboardEditToken.value, payload)
+    } catch (error) {
+      // Run deleted, or token rejected: start a fresh run rather than
+      // getting stuck. Other errors (network, 409 stale, 429) propagate.
+      if (![401, 403, 404].includes(error.status)) throw error
+      clearLeaderboardRun()
+      result = await createRun(payload)
+    }
+  } else {
+    // No run yet, or a run created before ownership tokens existed (it can
+    // no longer be edited): create a new one.
+    result = await createRun(payload)
+  }
 
-  return request.then((result) => {
-    leaderboardSubmitted.value = true
-    leaderboardRunId.value = result.id
-    leaderboardPlayerName.value = name
-    syncAchievements()
-    return result
-  })
+  leaderboardSubmitted.value = true
+  leaderboardRunId.value = result.id
+  leaderboardPlayerName.value = name
+  syncAchievements()
+  return result
 }
+
+// Single in-flight request: a double click, or the auto-update timer firing
+// during a manual submit, reuses the pending request instead of racing it.
+function submitCurrentRun(name) {
+  if (leaderboardInFlight) return leaderboardInFlight
+  leaderboardInFlight = sendRun(name).finally(() => {
+    leaderboardInFlight = null
+  })
+  return leaderboardInFlight
+}
+
+// Withdraw the player's run from the public leaderboard (server-side
+// deletion proven by the edit token), independent from the local reset.
+async function withdrawFromLeaderboard() {
+  if (leaderboardInFlight) await leaderboardInFlight.catch(() => {})
+  if (!leaderboardRunId.value || !leaderboardEditToken.value) return false
+  try {
+    await deleteRun(leaderboardRunId.value, leaderboardEditToken.value)
+  } catch (error) {
+    if (error.status !== 404) throw error
+  }
+  clearLeaderboardRun()
+  syncAchievements()
+  return true
+}
+
+const canWithdrawFromLeaderboard = computed(() => !!(leaderboardRunId.value && leaderboardEditToken.value))
 
 // Once a run has been submitted at least once, silently refresh it every
 // few minutes so the leaderboard reflects current progress (more rebirths,
 // money, trophies) without the player having to reopen the panel and click
 // "update" by hand every time.
 function autoUpdateLeaderboard() {
-  if (!gameStarted.value || !leaderboardRunId.value) return
+  if (!gameStarted.value || !leaderboardRunId.value || !leaderboardEditToken.value) return
   submitCurrentRun(leaderboardPlayerName.value).catch(() => {
     // Silent: a transient network hiccup shouldn't interrupt gameplay. The
     // next scheduled tick (or the player's own "update" click) retries it.
@@ -257,6 +338,15 @@ function unlockKonami() {
   syncAchievements()
 }
 
+// Opens the legal/privacy notice (closing any other dialog first, so only
+// one modal is ever open).
+function openPrivacy() {
+  showLeaderboard.value = false
+  showSettings.value = false
+  showTrophy.value = false
+  showPrivacy.value = true
+}
+
 function resetProgress() {
   counter.value = 0
   totalEarned.value = 0
@@ -269,8 +359,12 @@ function resetProgress() {
   sessionElapsedSeconds.value = 0
   activePlaySeconds.value = 0
   unlockedIds.clear()
+  // Local reset only: the public leaderboard entry (if any) is NOT deleted
+  // here; the settings offer "withdraw from leaderboard" for that.
   leaderboardSubmitted.value = false
   leaderboardRunId.value = null
+  leaderboardEditToken.value = null
+  leaderboardPendingKey.value = null
   leaderboardPlayerName.value = ''
   leaderboardRank.value = null
   konamiUnlocked.value = false
@@ -297,6 +391,14 @@ setInterval(autoUpdateLeaderboard, LEADERBOARD_AUTO_UPDATE_MS)
 
 restore()
 
+// Write the debounced save right away when the tab is hidden or closed.
+if (typeof window !== 'undefined') {
+  window.addEventListener('pagehide', () => flushSave())
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushSave()
+  })
+}
+
 export function useGameState() {
   return {
     counter,
@@ -318,9 +420,13 @@ export function useGameState() {
     leaderboardRunId,
     leaderboardPlayerName,
     leaderboardRank,
+    canWithdrawFromLeaderboard,
+    saveFailed,
     showTrophy,
     showLeaderboard,
     showSettings,
+    showPrivacy,
+    openPrivacy,
     doClick,
     buyUpgrade,
     doRebirth,
@@ -329,5 +435,6 @@ export function useGameState() {
     setLeaderboardRank,
     unlockKonami,
     resetProgress,
+    withdrawFromLeaderboard,
   }
 }

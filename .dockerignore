@@ -3,4 +3,16 @@ node_modules
 dist
 .git
 .idea
+.claude
 .DS_Store
+# Never send env files or secrets to the build context: the only build-time
+# value (VITE_API_URL, public) is a Docker build argument.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.sql
+*.dump
+*.bak
+*.log
