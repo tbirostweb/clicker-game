@@ -1,0 +1,4 @@
+framework:
+    # Filesystem locks (flock) shared by every PHP worker of the container:
+    # make the rate limiter atomic without any extra infrastructure service.
+    lock: 'flock'

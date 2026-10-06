@@ -247,7 +247,11 @@ async function createRun(payload) {
   }
   const result = await submitRun(payload, leaderboardPendingKey.value)
   leaderboardEditToken.value = result.editToken ?? null
+  leaderboardRunId.value = result.id ?? null
+  // Creation acknowledged: forget the key right away (and persist it), so it
+  // is never replayed later.
   leaderboardPendingKey.value = null
+  persist()
   return result
 }
 

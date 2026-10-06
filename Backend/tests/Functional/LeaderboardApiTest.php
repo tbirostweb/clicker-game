@@ -21,7 +21,10 @@ final class LeaderboardApiTest extends WebTestCase
         $metadata = $em->getMetadataFactory()->getAllMetadata();
         $tool->dropSchema($metadata);
         $tool->createSchema($metadata);
-        static::getContainer()->get('cache.app')->clear();
+        // Every pool (app, rate limiter, leaderboard GET cache).
+        static::getContainer()->get('cache.global_clearer')->clearPool('cache.app');
+        static::getContainer()->get('cache.global_clearer')->clearPool('cache.rate_limiter');
+        static::getContainer()->get('cache.global_clearer')->clearPool('leaderboard.cache');
     }
 
     private function em(): EntityManagerInterface
@@ -83,7 +86,7 @@ final class LeaderboardApiTest extends WebTestCase
         $a = $this->create(['name' => 'Alice']);
         $b = $this->create(['name' => 'Bob']);
 
-        [$status, $body] = $this->api('PUT', '/api/leaderboard/' . $a['id'], $this->runPayload(['name' => 'Alice', 'timeSeconds' => 200, 'rebirths' => 2]), ['X-Edit-Token' => $a['editToken']]);
+        [$status, $body] = $this->api('PUT', '/api/leaderboard/' . $a['id'], $this->runPayload(['name' => 'Alice', 'timeSeconds' => 200, 'rebirths' => 2, 'score' => 60000]), ['X-Edit-Token' => $a['editToken']]);
         self::assertSame(200, $status);
         self::assertSame(2, $body['rebirths']);
 
@@ -123,6 +126,13 @@ final class LeaderboardApiTest extends WebTestCase
         yield 'name too long' => [['name' => str_repeat('a', 21)], 422];
         yield 'name too short' => [['name' => 'a'], 422];
         yield 'zero time' => [['timeSeconds' => 0], 422];
+        yield 'more trophies than achievements' => [['trophies' => 55], 422];
+        yield 'active time above total time' => [['timeSeconds' => 100, 'activeSeconds' => 101], 422];
+        yield 'rebirths not paid by score' => [['rebirths' => 10, 'score' => 1000], 422];
+        yield 'score impossible for playtime' => [['score' => 9_000_000_000_000_000, 'timeSeconds' => 3600, 'activeSeconds' => 3600], 422];
+        yield 'banned name' => [['name' => 'Salope'], 422];
+        yield 'banned name in leetspeak' => [['name' => 'S4l0p3_du_93'], 422];
+        yield 'banned short word' => [['name' => 'gros con'], 422];
     }
 
     #[\PHPUnit\Framework\Attributes\DataProvider('invalidPayloads')]
@@ -165,39 +175,65 @@ final class LeaderboardApiTest extends WebTestCase
         self::assertSame(200, $status);
     }
 
-    public function testIdempotencyKeyPreventsDuplicatesAndRotatesToken(): void
+    public function testIdempotencyKeyReplayReturnsSameTokenWithoutRotation(): void
     {
         $key = 'b7c1d7a2-4f3e-4c47-9a5e-2f6d1c0e9a11';
         $first = $this->create([], ['Idempotency-Key' => $key]);
         [$status, $second] = $this->api('POST', '/api/leaderboard', $this->runPayload(), ['Idempotency-Key' => $key]);
         self::assertSame(200, $status);
         self::assertSame($first['id'], $second['id']);
-        self::assertNotSame($first['editToken'], $second['editToken']);
+        self::assertSame($first['editToken'], $second['editToken'], 'replay returns the token already issued');
         self::assertSame(1, $this->em()->getRepository(Player::class)->count([]));
 
+        $stored = $this->em()->getRepository(Player::class)->find($first['id']);
+        self::assertStringNotContainsString($first['editToken'], (string) $stored->getIdempotencyTokenBox(), 'token stored encrypted only');
+        self::assertNotSame($key, $stored->getIdempotencyKeyHash());
+
         [$status] = $this->api('PUT', '/api/leaderboard/' . $first['id'], $this->runPayload(['timeSeconds' => 300]), ['X-Edit-Token' => $first['editToken']]);
-        self::assertSame(403, $status, 'rotated-out token no longer works');
-        [$status] = $this->api('PUT', '/api/leaderboard/' . $first['id'], $this->runPayload(['timeSeconds' => 300]), ['X-Edit-Token' => $second['editToken']]);
-        self::assertSame(200, $status);
+        self::assertSame(200, $status, 'token still valid after the replay');
 
         [$status] = $this->api('POST', '/api/leaderboard', $this->runPayload(), ['Idempotency-Key' => 'short']);
         self::assertSame(400, $status);
     }
 
+    public function testIdempotencyKeyReplayAfterTtlCreatesNewRunWithoutTokenForOldOne(): void
+    {
+        $key = 'c8d2e8b3-5a4f-4d58-8b6f-3a7e2d1f0b22';
+        $first = $this->create([], ['Idempotency-Key' => $key]);
+        $this->em()->getConnection()->executeStatement(
+            'UPDATE player SET idempotency_created_at = ? WHERE id = ?',
+            [(new \DateTimeImmutable('-25 hours'))->format('Y-m-d H:i:s'), $first['id']]
+        );
+        $this->em()->clear();
+
+        [$status, $replay] = $this->api('POST', '/api/leaderboard', $this->runPayload(), ['Idempotency-Key' => $key]);
+        self::assertSame(201, $status, 'expired key: a new run is created');
+        self::assertNotSame($first['id'], $replay['id']);
+        self::assertNotSame($first['editToken'], $replay['editToken']);
+        self::assertSame(2, $this->em()->getRepository(Player::class)->count([]));
+
+        [$status] = $this->api('PUT', '/api/leaderboard/' . $first['id'], $this->runPayload(['timeSeconds' => 300]), ['X-Edit-Token' => $replay['editToken']]);
+        self::assertSame(403, $status, 'no token handed out for the old run');
+        [$status] = $this->api('PUT', '/api/leaderboard/' . $first['id'], $this->runPayload(['timeSeconds' => 300]), ['X-Edit-Token' => $first['editToken']]);
+        self::assertSame(200, $status, 'the original owner keeps its run');
+    }
+
     public function testStaleOrConcurrentUpdatesAreRejected(): void
     {
-        $run = $this->create(['timeSeconds' => 500, 'rebirths' => 3]);
+        $run = $this->create(['timeSeconds' => 500, 'rebirths' => 3, 'score' => 200000]);
         $headers = ['X-Edit-Token' => $run['editToken']];
 
-        [$status] = $this->api('PUT', '/api/leaderboard/' . $run['id'], $this->runPayload(['timeSeconds' => 400, 'rebirths' => 3]), $headers);
+        [$status] = $this->api('PUT', '/api/leaderboard/' . $run['id'], $this->runPayload(['timeSeconds' => 400, 'rebirths' => 3, 'score' => 200000]), $headers);
         self::assertSame(409, $status, 'older time cannot overwrite newer');
-        [$status] = $this->api('PUT', '/api/leaderboard/' . $run['id'], $this->runPayload(['timeSeconds' => 600, 'rebirths' => 2]), $headers);
+        [$status] = $this->api('PUT', '/api/leaderboard/' . $run['id'], $this->runPayload(['timeSeconds' => 600, 'rebirths' => 2, 'score' => 200000]), $headers);
         self::assertSame(409, $status, 'fewer rebirths cannot overwrite');
-        [$status, $body] = $this->api('PUT', '/api/leaderboard/' . $run['id'], $this->runPayload(['timeSeconds' => 600, 'rebirths' => 3, 'version' => 999]), $headers);
+        [$status] = $this->api('PUT', '/api/leaderboard/' . $run['id'], $this->runPayload(['timeSeconds' => 600, 'rebirths' => 3, 'score' => 199999]), $headers);
+        self::assertSame(409, $status, 'cumulative score never decreases');
+        [$status, $body] = $this->api('PUT', '/api/leaderboard/' . $run['id'], $this->runPayload(['timeSeconds' => 600, 'rebirths' => 3, 'score' => 200000, 'version' => 999]), $headers);
         self::assertSame(409, $status);
         self::assertSame(1, $body['version']);
 
-        [$status, $body] = $this->api('PUT', '/api/leaderboard/' . $run['id'], $this->runPayload(['timeSeconds' => 700, 'rebirths' => 3, 'version' => 1]), $headers);
+        [$status, $body] = $this->api('PUT', '/api/leaderboard/' . $run['id'], $this->runPayload(['timeSeconds' => 700, 'rebirths' => 3, 'score' => 210000, 'version' => 1]), $headers);
         self::assertSame(200, $status);
         self::assertSame(2, $body['version'], 'each update bumps the version');
 
@@ -239,6 +275,16 @@ final class LeaderboardApiTest extends WebTestCase
             [$status, $body, $response] = $this->api('DELETE', '/api/leaderboard/' . $run['id'], null, ['X-Admin-Token' => 'short'], '10.0.0.50');
             self::assertSame(403, $status, 'too-short ADMIN_TOKEN is treated as not configured');
             self::assertStringNotContainsString('short', (string) $response->getContent());
+        } finally {
+            [$_SERVER['ADMIN_TOKEN'], $_ENV['ADMIN_TOKEN']] = $saved;
+        }
+
+        $saved = [$_SERVER['ADMIN_TOKEN'] ?? null, $_ENV['ADMIN_TOKEN'] ?? null];
+        try {
+            // Long enough but no entropy: refused as well.
+            $_SERVER['ADMIN_TOKEN'] = $_ENV['ADMIN_TOKEN'] = str_repeat('ab', 20);
+            [$status] = $this->api('DELETE', '/api/leaderboard/' . $run['id'], null, ['X-Admin-Token' => str_repeat('ab', 20)], '10.0.0.51');
+            self::assertSame(403, $status, 'low-entropy ADMIN_TOKEN is treated as not configured');
         } finally {
             [$_SERVER['ADMIN_TOKEN'], $_ENV['ADMIN_TOKEN']] = $saved;
         }

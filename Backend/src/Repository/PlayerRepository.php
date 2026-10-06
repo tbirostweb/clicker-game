@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Player;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -30,13 +31,58 @@ class PlayerRepository extends ServiceEntityRepository
      */
     public function findTopRuns(int $limit, string $sort = 'active'): array
     {
+        return $this->topRunsQuery($limit, $sort)->getResult();
+    }
+
+    /** Query used by findTopRuns (exposed for the EXPLAIN regression test). */
+    public function topRunsQuery(int $limit, string $sort = 'active'): Query
+    {
         $column = self::SORT_COLUMNS[$sort] ?? self::SORT_COLUMNS['active'];
 
         return $this->createQueryBuilder('p')
             ->orderBy($column['field'], $column['direction'])
             ->setMaxResults($limit)
+            ->getQuery();
+    }
+
+    /**
+     * Ids of runs inactive since $before (last update, or creation for runs
+     * never updated) that are NOT visible on any leaderboard sort (top
+     * $protectTop of each), so a purge never changes what players see.
+     *
+     * @return list<int>
+     */
+    public function findPurgeableInactiveIds(\DateTimeImmutable $before, int $protectTop): array
+    {
+        $protected = [];
+        foreach (array_keys(self::SORT_COLUMNS) as $sort) {
+            foreach ($this->topRunsQuery($protectTop, $sort)->getResult() as $run) {
+                $protected[$run->getId()] = true;
+            }
+        }
+
+        $ids = $this->createQueryBuilder('p')
+            ->select('p.id')
+            ->where('COALESCE(p.updatedAt, p.createdAt) < :before')
+            ->setParameter('before', $before)
             ->getQuery()
-            ->getResult();
+            ->getSingleColumnResult();
+
+        return array_values(array_filter(array_map('intval', $ids), static fn (int $id) => !isset($protected[$id])));
+    }
+
+    /** Forgets Idempotency-Keys (and their encrypted token) older than $before. */
+    public function expireIdempotencyKeys(\DateTimeImmutable $before): int
+    {
+        return $this->createQueryBuilder('p')
+            ->update()
+            ->set('p.idempotencyKeyHash', 'NULL')
+            ->set('p.idempotencyTokenBox', 'NULL')
+            ->set('p.idempotencyCreatedAt', 'NULL')
+            ->where('p.idempotencyCreatedAt < :before')
+            ->setParameter('before', $before)
+            ->getQuery()
+            ->execute();
     }
 
     //    /**

@@ -1,4 +1,6 @@
-const BASE_URL = import.meta.env?.VITE_API_URL || 'http://clicker-game.local:8319'
+// Production builds require an HTTPS VITE_API_URL (enforced in vite.config.js);
+// the local fallback only applies to the dev server and unit tests.
+const BASE_URL = import.meta.env?.VITE_API_URL || (import.meta.env?.PROD ? '' : 'http://clicker-game.local:8319')
 const REQUEST_TIMEOUT_MS = 15_000
 
 // Largest integer both the browser and the API accept exactly.

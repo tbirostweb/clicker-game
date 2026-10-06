@@ -49,7 +49,11 @@ export function sanitizeSave(data, { upgradeBase, multiplier = 1.15, knownAchiev
   const editToken = typeof data.leaderboardEditToken === 'string' && EDIT_TOKEN_PATTERN.test(data.leaderboardEditToken)
     ? data.leaderboardEditToken
     : null
+  // A pending Idempotency-Key only matters while a creation is
+  // unacknowledged: once the run id and its edit token are known, the key has
+  // served its purpose and is dropped (the server forgets it after 24 h).
   const pendingKey = typeof data.leaderboardPendingKey === 'string' && IDEMPOTENCY_KEY_PATTERN.test(data.leaderboardPendingKey)
+    && !(nonNegativeInt(data.leaderboardRunId, 0) > 0 && editToken)
     ? data.leaderboardPendingKey
     : null
   const rank = nonNegativeInt(data.leaderboardRank, null)

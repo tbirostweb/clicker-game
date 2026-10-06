@@ -2,13 +2,56 @@
 framework:
     secret: '%env(APP_SECRET)%'
 
-    # Behind Traefik (Dokploy): only trust the direct connecting peer, since
-    # only the reverse proxy can reach this container on the private network.
+    # Behind Traefik (Dokploy). TRUSTED_PROXIES must be the exact IP/CIDR of
+    # the Traefik network, never 'REMOTE_ADDR' (that trusts any peer and lets
+    # a client forge X-Forwarded-For) and no container port may be published:
+    # see README "Déploiement". An untrusted peer's X-Forwarded-For is ignored
+    # (covered by LeaderboardApiTest::testForgedForwardedForFromUntrustedPeerIsIgnored).
     trusted_proxies: '%env(TRUSTED_PROXIES)%'
     trusted_headers: ['x-forwarded-for', 'x-forwarded-host', 'x-forwarded-proto', 'x-forwarded-port']
 
     # Note that the session will be started ONLY if you read or write from it.
     session: true
+
+    # Leaderboard anti-abuse limits (sliding windows). State lives in the
+    # filesystem cache pool and every check runs under a per-key flock (see
+    # lock.yaml): atomic across PHP workers, no extra infrastructure service.
+    # Keys are client IPs, IPv6 aggregated per /64 (App\Security\LeaderboardRateLimiter).
+    rate_limiter:
+        leaderboard_post:
+            policy: sliding_window
+            limit: 10
+            interval: '10 minutes'
+        # Global cap on run creations, all clients together.
+        leaderboard_post_global:
+            policy: sliding_window
+            limit: 500
+            interval: '1 hour'
+        leaderboard_put:
+            policy: sliding_window
+            limit: 30
+            interval: '10 minutes'
+        leaderboard_owner_delete:
+            policy: sliding_window
+            limit: 10
+            interval: '10 minutes'
+        leaderboard_admin_failure:
+            policy: sliding_window
+            limit: 5
+            interval: '15 minutes'
+        leaderboard_get:
+            policy: sliding_window
+            limit: 120
+            interval: '1 minute'
+
+    cache:
+        pools:
+            # Short server-side cache of GET /api/leaderboard, invalidated by
+            # tag on every write.
+            leaderboard.cache:
+                adapter: cache.app
+                tags: true
+                default_lifetime: 15
 
     #esi: true
     #fragments: true

@@ -68,3 +68,13 @@ test('a non-finite upgrade price (serialized as null) is recomputed', () => {
     assert.ok(Number.isFinite(u.price) && u.price >= UPGRADE_BASE[i].price)
   })
 })
+
+test('a pending Idempotency-Key is kept until the creation is acknowledged, then dropped', () => {
+  const key = 'b7c1d7a2-4f3e-4c47-9a5e-2f6d1c0e9a11'
+  const pending = sanitizeSave({ leaderboardPendingKey: key }, opts)
+  assert.equal(pending.leaderboardPendingKey, key, 'unacknowledged creation: retried with the same key')
+
+  const done = sanitizeSave({ leaderboardPendingKey: key, leaderboardRunId: 7, leaderboardEditToken: 'a'.repeat(64) }, opts)
+  assert.equal(done.leaderboardPendingKey, null, 'run id + token known: key forgotten')
+  assert.equal(done.leaderboardRunId, 7)
+})
