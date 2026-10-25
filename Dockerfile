@@ -14,7 +14,7 @@ RUN npm ci --ignore-scripts
 COPY . .
 RUN npm run build
 
-FROM nginxinc/nginx-unprivileged:1.27-alpine
+FROM nginxinc/nginx-unprivileged:1.30.6-alpine
 ARG VITE_API_URL=https://clicker-api.theo-birost.fr
 USER root
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
