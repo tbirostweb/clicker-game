@@ -10,7 +10,8 @@ RUN composer install --no-dev --no-scripts --no-progress --prefer-dist --optimiz
 COPY . .
 RUN composer dump-autoload --optimize --no-dev --classmap-authoritative
 
-FROM php:8.3-apache-bookworm
+# PHP >= 8.3.36: php2shell fix (CVE-2026-109618 / CVE-2026-109619)
+FROM php:8.3.36-apache-bookworm
 # Build-only packages (libicu-dev...) are purged after compiling the
 # extensions; only the shared libraries they link to are kept.
 RUN set -eux; \
